@@ -19,8 +19,6 @@ highPassFg=[0.05,0.1,0.2,0.3,0.4,0.5];%Hz
 combinationsFg=combvec(lowPassFg,highPassFg)';
 
 
-
-
 for dBlvl=1:1:size(noiseLvl)
 
 % Study variables
@@ -37,7 +35,7 @@ FPT=cell(numSetups,1);
 
 
 % Evaluate all ECGs
-for setupsNo=1:1:length(input.ECGs)
+parfor setupsNo=1:length(input.ECGs)
     %% Clean experiments
     disp(['Starting with Signal ' num2str(setupsNo)])
     ecgMatrixUnique=input.ECGs(setupsNo).signal;
