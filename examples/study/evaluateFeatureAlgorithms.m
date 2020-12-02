@@ -35,7 +35,7 @@ FPT=cell(numSetups,1);
 
 
 % Evaluate all ECGs
-parfor setupsNo=1:length(input.ECGs)
+for setupsNo=1:length(input.ECGs)
     %% Clean experiments
     disp(['Starting with Signal ' num2str(setupsNo)])
     ecgMatrixUnique=input.ECGs(setupsNo).signal;
