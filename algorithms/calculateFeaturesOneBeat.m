@@ -326,7 +326,7 @@ end
 if isempty(TzeroPos) %Obviously, this wave is not a biphasic wave...
     [TAmp,tidx]=max(abs(TAmp));
     TPos=TPos(tidx);
-    [featureMatrix,featureNames]=calculateFeaturesOneBeat_monophasic(ecg_matrix,samplerate,QRSmaxTransform,TPos,RPos,TAmp);
+    [featureMatrix,featureNames]=calculateFeaturesOneBeat_monophasic(ecg_matrix,samplerate,TPos,RPos,TAmp);
 else
     
     %% Fit Gaussian function for the calculation of features
