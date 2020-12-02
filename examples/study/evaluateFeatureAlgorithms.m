@@ -7,6 +7,21 @@ addpath(genpath('../../dependencies/ECGdeli'));
 addpath(genpath('../../algorithms/'));
 input=load('sim_signals.mat');
 
+% create a local cluster object
+pc = parcluster('local');
+
+% get the number of dedicated cores from environment
+num_workers = str2num(getenv('SLURM_NPROCS'));
+
+% explicitly set the JobStorageLocation to the tmp directory that is unique to each cluster job (and is on local, fast scratch)
+parpool_tmpdir = [getenv('TMP'),'/.matlab/local_cluster_jobs/slurm_jobID_',getenv('SLURM_JOB_ID')];
+mkdir(parpool_tmpdir);
+pc.JobStorageLocation = parpool_tmpdir;
+
+% start the parallel pool
+parpool(pc, num_workers, 'IdleTimeout',Inf);
+
+
 % Define some important parameters
 samplerate=1000;
 nfeatures=18;
@@ -23,7 +38,7 @@ for dBlvl=1:1:size(noiseLvl)
 
 % Study variables
 noisedB=noiseLvl(dBlvl);
-nRep=10;
+nRep=50;
 numSetups=length(input.ECGs);
 ecgNoise=cell(numSetups,1);
 ecgMaxQRS=cell(numSetups,1);
