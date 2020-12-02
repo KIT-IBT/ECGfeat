@@ -63,7 +63,7 @@ parfor setupsNo=1:length(input.ECGs)
     
     %% Noisy
     featureMatrix_noise_tmp=cell(1,size(combinationsFg,1),size(input.ECGs(setupsNo).signal,2));
-    featureMatrix_cleanFilt_tmp=cell(1,size(combinationsFg,1),size(input.ECGs(setupsNo).signal,2));
+    featureMatrix_cleanFilt_tmp=cell(1,size(combinationsFg,1));
     for fg=1:size(combinationsFg,1)
         fgHigh=combinationsFg(fg,2);
         fgLow=combinationsFg(fg,1);
