@@ -47,6 +47,8 @@ parfor setupsNo=1:length(input.ECGs)
     [featureMatrix_clean{setupsNo,1},featureNames]=calculateFeaturesOneBeat(ecgMatrixUnique,samplerate,1,FPT{setupsNo,1});
     
     %% Noisy
+    featureMatrix_noise_tmp=cell(1,size(combinationsFg,1),size(input.ECGs(setupsNo).signal,2));
+    featureMatrix_cleanFilt_tmp=cell(1,size(combinationsFg,1),size(input.ECGs(setupsNo).signal,2));
     for fg=1:size(combinationsFg,1)
         fgHigh=combinationsFg(fg,2);
         fgLow=combinationsFg(fg,1);
@@ -54,10 +56,11 @@ parfor setupsNo=1:length(input.ECGs)
         % Evaluate only filtering without noise
         ecg_cleanFilt=ECG_High_Low_Filter(ecgMatrixUnique,samplerate,fgHigh,fgLow);
         [~,FPTcellfilt]=getFPTFromSimulations(ecgMatrixUnique,samplerate);
-        featureMatrix_cleanFilt{setupsNo,fg}=calculateFeaturesOneBeat(ecg_cleanFilt,samplerate,1,FPTcellfilt);
+        featureMatrix_cleanFilt_tmp{1,fg}=calculateFeaturesOneBeat(ecg_cleanFilt,samplerate,1,FPTcellfilt);
         
         % Evaluate only filtering with noise
-        for ld=1:1:size(input.ECGs(setupsNo).signal,2)
+        featureMatrix_noise_tmptmp=cell(1,1,size(input.ECGs(setupsNo).signal,2));
+        for ld=1:size(input.ECGs(setupsNo).signal,2)
             featRep=nan(nfeatures,nRep);
             for rep=1:nRep
                 tmp=repmat(ecgMatrixUnique(:,ld),3,1)+wgn(3*size(ecgMatrixUnique(:,ld),1),1,var(repmat(ecgMatrixUnique(:,ld),3,1))/10^(noisedB/10),'linear');
@@ -66,9 +69,12 @@ parfor setupsNo=1:length(input.ECGs)
                 %Calculate features
                 featRep(:,rep)=calculateFeaturesOneBeat(ecgNoise,samplerate,1,FPTcellfilt{ld,1});
             end
-            featureMatrix_noise{setupsNo,fg,ld}=featRep;
+            featureMatrix_noise_tmptmp{1,1,ld}=featRep;
         end
+        featureMatrix_noise_tmp(1,fg,:)=featureMatrix_noise_tmptmp;
     end
+    featureMatrix_cleanFilt(setupsNo,:)=featureMatrix_cleanFilt_tmp;
+    featureMatrix_noise(setupsNo,:,:)=featureMatrix_noise_tmp;
 end
 
 save(strcat('Results_',num2str(noisedB),'dB'),'featureMatrix_noise','featureMatrix_clean','featureMatrix_cleanFilt','combinationsFg','nfeatures');
