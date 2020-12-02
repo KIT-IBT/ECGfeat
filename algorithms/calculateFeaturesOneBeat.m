@@ -400,7 +400,7 @@ else
     
     % First Gaussian on the left part
     xexcl=ones(length(xfit),1);
-    xexcl(max(1,(round(npkPos-round(120*10^(-3)*samplerate))):min(size(xfit,1),round(npkPos+0.2*lengthbw)))',1)=0;
+    xexcl(max(1,(round(npkPos-round(120*10^(-3)*samplerate))):min(size(xfit,2),round(npkPos+0.2*lengthbw)))',1)=0;
     xexcl=find(xexcl);
     
     fo = fitoptions('Method','NonlinearLeastSquares',...
@@ -414,7 +414,7 @@ else
     
     % Second Gaussian on the right part
     xexcl=ones(length(xfit),1);
-    xexcl(max(1,(round(npkPos-20*10^(-3)*samplerate)):min(size(xfit,1),round(npkPos+0.6*lengthbw)))',1)=0;
+    xexcl(max(1,(round(npkPos-20*10^(-3)*samplerate)):min(size(xfit,2),round(npkPos+0.6*lengthbw)))',1)=0;
     xexcl=find(xexcl);
     fo = fitoptions('Method','NonlinearLeastSquares',...
         'Lower',[-1,-2.001,0,-2],...
@@ -444,7 +444,7 @@ else
     
     % First Gaussian on the right part
     xexcl=ones(length(xfit),1);
-    xexcl(max(1,(npkPos-round(0.2*lengthbw)):min(size(xfit,1),round(npkPos+round(120*10^(-3)*samplerate))))',1)=0;
+    xexcl(max(1,(npkPos-round(0.2*lengthbw)):min(size(xfit,2),round(npkPos+round(120*10^(-3)*samplerate))))',1)=0;
     xexcl=find(xexcl);
     fo = fitoptions('Method','NonlinearLeastSquares',...
         'Lower',[-1,-2.001,0,-2],...
@@ -457,7 +457,7 @@ else
     
     % Second Gaussian on left part
     xexcl=ones(length(xfit),1);
-    xexcl(max(1,(npkPos-round(0.6*lengthbw)):min(size(xfit,1),round(npkPos+20*10^(-3)*samplerate)))',1)=0;
+    xexcl(max(1,(npkPos-round(0.6*lengthbw)):min(size(xfit,2),round(npkPos+20*10^(-3)*samplerate)))',1)=0;
     xexcl=find(xexcl);
     fo = fitoptions('Method','NonlinearLeastSquares',...
         'Lower',[-1,-2.001,0,-2],...
