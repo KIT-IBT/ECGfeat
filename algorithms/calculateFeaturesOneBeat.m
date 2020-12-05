@@ -280,8 +280,8 @@ featureMatrix(12,1)=sum(signal(TPos+1:rightIdx))/sum(signal(leftIdx:rightIdx));
 
 %% QRS features: Amplitude, Energy, Ratio
 featureMatrix(13,1)=signal(RPos);
-RIdxLeft=max(1,RPos-0.035*samplerate);
-RIdxRight=min(RPos+0.035*samplerate,size(signal,1));
+RIdxLeft=max(1,RPos-round(0.035*samplerate));
+RIdxRight=min(RPos+round(0.035*samplerate),size(signal,1));
 featureMatrix(14,1)=sum(signal(RIdxLeft:RIdxRight).^2);
 featureMatrix(15,1)=featureMatrix(14,1)/featureMatrix(13,1);
 
