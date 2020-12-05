@@ -15,11 +15,11 @@ Highpass and lowpass filtering influences the morphology of the ECG. This is why
 | Highpass cutoff freq. | 0.10 | 0.10 | 0.30 | 0.40 | 0.20 | 0.30 | 0.10 |   -  | 0.20 |
 
 ## Structure
-The structure of the repository is as follows:
-./algorithms contains the feature extraction algorithms
-./dependencies contains other projects this one is using
-./examples/study contains a robustness study of the feature algorithms as well as the calculation of recommendations for filtering without interfering the results from the feature extraction
-./examples/patient_data contains an example showing how a workflow with a clinical signal from [1][2] could look like
+The structure of the repository is as follows: <br>
+**./algorithms** contains the feature extraction algorithms <br>
+**./dependencies** contains other projects this one is using <br>
+**./examples/study** contains a robustness study of the feature algorithms as well as the calculation of recommendations for filtering without interfering the results from the feature extraction <br>
+**./examples/patient_data** contains an example showing how a workflow with a clinical signal from [1][2] could look like <br>
 
 ## Next releases
 Further algorithms can be found in the development branch and will be added to the main branch in one of the next releases.
