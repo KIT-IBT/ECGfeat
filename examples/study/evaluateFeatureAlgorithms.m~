@@ -7,9 +7,25 @@ addpath(genpath('../../dependencies/ECGdeli'));
 addpath(genpath('../../algorithms/'));
 input=load('sim_signals.mat');
 
+% create a local cluster object
+pc = parcluster('local');
+
+% get the number of dedicated cores from environment
+num_workers = str2num(getenv('SLURM_NPROCS'));
+
+% explicitly set the JobStorageLocation to the tmp directory that is unique to each cluster job (and is on local, fast scratch)
+parpool_tmpdir = [getenv('TMP'),'/.matlab/local_cluster_jobs/slurm_jobID_',getenv('SLURM_JOB_ID')];
+mkdir(parpool_tmpdir);
+pc.JobStorageLocation = parpool_tmpdir;
+
+% start the parallel pool
+parpool(pc, num_workers, 'IdleTimeout',Inf);
+
+
 % Define some important parameters
 samplerate=1000;
 nfeatures=18;
+
 
 % Define all sweeping parameters
 noiseLvl=[10,20,30]; %dB
@@ -81,16 +97,11 @@ for dBlvl=1:1:size(noiseLvl,2)
     end
 end
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Visualize the results
-%%%%%%%%%%%%%%%%%%%%%%%%%
-
 for dBlvl=1:1:size(noiseLvl,2)
-    noisedB=noiseLvl(dBlvl);
     load(strcat('Results_',num2str(noisedB),'dB.mat'))
-    disp(['Evaluating results with SNR of ',num2str(noisedB),'dB'])
-
+    
+    %% Visualize the results
+    nRep=50;
     % Calculate errors and relative errors
     featAll_clean=cell(size(featureMatrix_noise,3),1);
     featAll_cleanFilt=cell(size(featureMatrix_noise,3),1);
@@ -173,11 +184,11 @@ for dBlvl=1:1:size(noiseLvl,2)
     
     table1=cell(5,1);
     for i=1:1:length(bsm1prc)
-        table1{1,1}=[table1{1,1},'Feat',num2str(i,'%02i'),char(9)];
-        table1{2,1}=[table1{2,1},num2str(coffFreqLP(i,1),'%02i'),char(9)];
-        table1{3,1}=[table1{3,1},num2str(bsm1prcValLP(i,1),'%02.2f'),char(9)];
-        table1{4,1}=[table1{4,1},num2str(coffFreqHP(i,1),'%02.2f'),char(9)];
-        table1{5,1}=[table1{5,1},num2str(bsm1prcValHP(i,1),'%02.2f'),char(9)];
+        table1{1,1}=[table1{1,1},'Feat',num2str(i,'%02i'),'   '];
+        table1{2,1}=[table1{2,1},num2str(coffFreqLP(i,1),'%02i'),'   '];
+        table1{3,1}=[table1{3,1},num2str(bsm1prcValLP(i,1),'%02.2f'),'   '];
+        table1{4,1}=[table1{4,1},num2str(coffFreqHP(i,1),'%02.2f'),'   '];
+        table1{5,1}=[table1{5,1},num2str(bsm1prcValHP(i,1),'%02.2f'),'   '];
     end
     disp(table1)
     
@@ -244,10 +255,9 @@ for dBlvl=1:1:size(noiseLvl,2)
         stdErrNoise(feat,1)=nanstd(abs(relErr_noise2))*100; %relative error in %
     end
     
-    table3=cell(2,1);
+    table3=cell(1,1);
     for feat=1:1:nfeatures
-        table3{1,1}=[table3{1,1},'Feat',num2str(feat,'%02i'),char(9)];
-        table3{2,1}=[table3{2,1},num2str(meanErrNoise(feat,1),'%3.1f'),char(177),num2str(stdErrNoise(feat,1),'%02.1f') ,char(9)];
+        table3{1,1}=[table3{1,1},num2str(meanErrNoise(feat,1),'%3.1f'),char(177),num2str(stdErrNoise(feat,1),'%02.1f') ,'   '];
     end
     disp(table3)
     
@@ -308,10 +318,9 @@ for dBlvl=1:1:size(noiseLvl,2)
         stdErrNoise(feat,1)=nanstd(abs(relErr_noise2))*100; %relative error in %
     end
     
-    table4=cell(2,1);
+    table4=cell(1,1);
     for feat=1:1:nfeatures
-        table4{1,1}=[table4{1,1},'Feat',num2str(feat,'%02i'),char(9)];
-        table4{2,1}=[table4{2,1},num2str(meanErrNoise(feat,1),'%3.1f'), char(177),num2str(stdErrNoise(feat,1),'%02.1f') ,char(9)];
+        table4{1,1}=[table4{1,1},num2str(meanErrNoise(feat,1),'%3.1f'), char(177),num2str(stdErrNoise(feat,1),'%02.1f') ,'   '];
     end
     disp(table4)
 end

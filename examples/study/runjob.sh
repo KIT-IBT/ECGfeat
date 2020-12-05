@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --ntasks=40
-#SBATCH --time=0:30:00
+#SBATCH --time=6:30:00
 #SBATCH --mem=64000
 
 module load math/matlab
