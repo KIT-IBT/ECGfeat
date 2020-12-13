@@ -90,7 +90,7 @@ for dBlvl=1:1:size(noiseLvl,2)
     noisedB=noiseLvl(dBlvl);
     load(strcat('Results_',num2str(noisedB),'dB.mat'))
     disp(['Evaluating results with SNR of ',num2str(noisedB),'dB'])
-
+    
     % Calculate errors and relative errors
     featAll_clean=cell(size(featureMatrix_noise,3),1);
     featAll_cleanFilt=cell(size(featureMatrix_noise,3),1);
@@ -119,30 +119,39 @@ for dBlvl=1:1:size(noiseLvl,2)
         err_cleanFilt{ld,1}=featAll_cleanFilt{ld,1}-repmat(featAll_clean{ld,1},1,numComb);
         relErr_cleanFilt{ld,1}=err_cleanFilt{ld,1}./repmat(featAll_clean{ld,1},1,numComb);
     end
-
     
-    %% Build the table for filtering recommendations 
+    
+    %% Build the table for filtering recommendations
     % get the lowest lowpass frequency without disturbing the features
     idxLP=find(combinationsFg(:,2)==min(combinationsFg(:,2)));
     meanErrFilt=nan(size(featureMatrix_noise,3),nfeatures,length(idxLP));
     for ld=1:1:8 % leads
         for lp=1:1:length(idxLP)
             for feat=1:1:18 % features
-                meanErrFilt(ld,feat,lp)=nanmean(relErr_cleanFilt{ld,1}(feat:nfeatures:end,lp))*100; %relative error in %
+                if feat==17
+                    meanErrFilt(ld,feat,lp)=sum(abs(sign(err_cleanFilt{ld,1}(feat:nfeatures:end,lp)-1)))/sum(~isnan(err_cleanFilt{ld,1}(feat:nfeatures:end,lp)));
+                else
+                    meanErrFilt(ld,feat,lp)=nanmean(relErr_cleanFilt{ld,1}(feat:nfeatures:end,lp))*100; %relative error in %
+                end
             end
         end
     end
     % get the frequency showing maximum 5% error
     tmp=squeeze(max(abs(meanErrFilt),[],1));
+    tmp(17,:)=squeeze(min(abs(meanErrFilt(:,17,:)),[],1));
     bsm1prc=nan(nfeatures,1);
     bsm1prcValLP=nan(nfeatures,1);
     for ft=1:1:nfeatures
-        if ~isempty(find(tmp(ft,:)<=5,1,'first'))
-            bsm1prc(ft,1)=find(tmp(ft,:)<=5,1,'first');
+        if ft==17
+            bsm1prc(ft,1)=find(tmp(ft,:)==max(tmp(ft,:)),1,'first');
             bsm1prcValLP(ft,1)=tmp(ft,bsm1prc(ft,1));
+        else
+            if ~isempty(find(tmp(ft,:)<=5,1,'first'))
+                bsm1prc(ft,1)=find(tmp(ft,:)<=5,1,'first');
+                bsm1prcValLP(ft,1)=tmp(ft,bsm1prc(ft,1));
+            end
         end
     end
-    bsm1prc(17,1)=1;
     coffFreqLP=combinationsFg(bsm1prc,1);
     
     
@@ -152,7 +161,11 @@ for dBlvl=1:1:size(noiseLvl,2)
     for ld=1:1:8 % leads
         for lp=1:1:length(idxLP)
             for feat=1:1:18 % features
-                meanErrFilt(ld,feat,lp)=nanmean(relErr_cleanFilt{ld,1}(feat:nfeatures:end,lp))*100; %relative error in %
+                if feat==17
+                    meanErrFilt(ld,feat,lp)=sum(abs(sign(err_cleanFilt{ld,1}(feat:nfeatures:end,lp)-1)))/sum(~isnan(err_cleanFilt{ld,1}(feat:nfeatures:end,lp)));
+                else
+                    meanErrFilt(ld,feat,lp)=nanmean(relErr_cleanFilt{ld,1}(feat:nfeatures:end,lp))*100; %relative error in %
+                end
             end
         end
     end
@@ -162,12 +175,16 @@ for dBlvl=1:1:size(noiseLvl,2)
     bsm1prc=nan(nfeatures,1);
     bsm1prcValHP=nan(nfeatures,1);
     for ft=1:1:nfeatures
-        if ~isempty(find(tmp(ft,:)<=5,1,'first'))
-            bsm1prc(ft,1)=find(tmp(ft,:)<=5,1,'first');
+        if ft==17
+            bsm1prc(ft,1)=find(tmp(ft,:)==max(tmp(ft,:)),1,'first');
             bsm1prcValHP(ft,1)=tmp(ft,bsm1prc(ft,1));
+        else
+            if ~isempty(find(tmp(ft,:)<=5,1,'first'))
+                bsm1prc(ft,1)=find(tmp(ft,:)<=5,1,'first');
+                bsm1prcValHP(ft,1)=tmp(ft,bsm1prc(ft,1));
+            end
         end
     end
-    bsm1prc(17,1)=1;
     coffFreqHP=combinationsFg(idxLP(bsm1prc),2);
     
     
@@ -185,133 +202,53 @@ for dBlvl=1:1:size(noiseLvl,2)
     
     
     %% Extract the errors with the noisy signals and the filtering recommendations
-    
-    nleads=8;
-    % get the lowest lowpass frequency without disturbing the features
-    idxLP=find(combinationsFg(:,2)==min(combinationsFg(:,2)));
-    meanErrFilt=nan(size(featureMatrix_noise,3),nfeatures,length(idxLP));
-    for ld=1:1:nleads % leads
-        for lp=1:1:length(idxLP)
-            for feat=1:1:18 % features
-                meanErrFilt(ld,feat,lp)=nanmean(relErr_cleanFilt{ld,1}(feat:nfeatures:end,lp))*100; %relative error in %
-            end
-        end
-    end
-    
-    % get the frequency showing maximum 5% error for each feature
-    tmp=squeeze(max(abs(meanErrFilt),[],1));
-    bsm1prcLP=nan(nfeatures,1);
-    for ft=1:1:nfeatures
-        if ~isempty(find(tmp(ft,:)<=5,1,'first'))
-            bsm1prcLP(ft,1)=find(tmp(ft,:)<=5,1,'first');
-        end
-    end
-    bsm1prcLP(17,1)=1;
-    coffFreqLP=combinationsFg(idxLP(bsm1prcLP),1);
-    
-    
-    % get the highest highpass frequency without disturbing the features
-    idxHP=find(combinationsFg(:,1)==max(combinationsFg(:,1)));
-    meanErrFilt=nan(size(featureMatrix_noise,3),nfeatures,length(idxHP));
-    for ld=1:1:nleads % leads
-        for lp=1:1:length(idxHP)
-            for feat=1:1:18 % features
-                meanErrFilt(ld,feat,lp)=nanmean(relErr_cleanFilt{ld,1}(feat:nfeatures:end,lp))*100; %relative error in %
-            end
-        end
-    end
-    
-    % get the frequency showing maximum 5% error for each feature
-    tmp=squeeze(max(abs(meanErrFilt),[],1));
-    bsm1prc=nan(nfeatures,1);
-    bsm1prcValHP=nan(nfeatures,1);
-    for ft=1:1:nfeatures
-        if ~isempty(find(tmp(ft,:)<=5,1,'first'))
-            bsm1prc(ft,1)=find(tmp(ft,:)<=5,1,'first');
-            bsm1prcValHP(ft,1)=tmp(ft,bsm1prc(ft,1));
-        end
-    end
-    bsm1prc(17,1)=1;
-    coffFreqHP=combinationsFg(idxHP(bsm1prc),2);
-    
-    
-    meanErrNoise=nan(18,1);
-    stdErrNoise=nan(18,1);
+
+    medErrNoise=nan(18,1);
+    iqrErrNoise=nan(18,1);
     for feat=1:1:nfeatures
         hplptmp=find(combinationsFg(:,1)==coffFreqLP(feat,1)&combinationsFg(:,2)==coffFreqHP(feat,1));
-        relErr_noise2=cell2mat(cellfun(@(x) x(feat:nfeatures:end,hplptmp),relErr_noise,'UniformOutput',0));
-        meanErrNoise(feat,1)=nanmean(abs(relErr_noise2))*100; %relative error in %
-        stdErrNoise(feat,1)=nanstd(abs(relErr_noise2))*100; %relative error in %
+        if feat==17
+            relErr_noise2=cell2mat(cellfun(@(x) x(feat:nfeatures:end,hplptmp),err_noise,'UniformOutput',0));
+            acc=sum(abs(sign(relErr_noise2-1)))/sum(~isnan(relErr_noise2));
+            medErrNoise(feat,1)=acc;
+            iqrErrNoise(feat,1)=0;
+        else
+            relErr_noise2=cell2mat(cellfun(@(x) x(feat:nfeatures:end,hplptmp),relErr_noise,'UniformOutput',0));
+            medErrNoise(feat,1)=nanmedian(abs(relErr_noise2))*100; %relative error in %
+            iqrErrNoise(feat,1)=iqr(abs(relErr_noise2(~isnan(relErr_noise2))))*100; %relative error in %
+        end
     end
     
     table3=cell(2,1);
     for feat=1:1:nfeatures
         table3{1,1}=[table3{1,1},'Feat',num2str(feat,'%02i'),char(9)];
-        table3{2,1}=[table3{2,1},num2str(meanErrNoise(feat,1),'%3.1f'),char(177),num2str(stdErrNoise(feat,1),'%02.1f') ,char(9)];
+        table3{2,1}=[table3{2,1},num2str(medErrNoise(feat,1),'%3.1f'),char(177),num2str(iqrErrNoise(feat,1),'%02.1f') ,char(9)];
     end
     disp(table3)
     
     
     %% Evaluate the noisy signals again but average beforehand the feature values on the noisy data
     
-    nleads=8;
-    % get the lowest lowpass frequency without disturbing the features
-    idxLP=find(combinationsFg(:,2)==min(combinationsFg(:,2)));
-    meanErrFilt=nan(size(featureMatrix_noise,3),nfeatures,length(idxLP));
-    for ld=1:1:nleads % leads
-        for lp=1:1:length(idxLP)
-            for feat=1:1:18 % features
-                meanErrFilt(ld,feat,lp)=nanmean(relErr_cleanFilt{ld,1}(feat:nfeatures:end,lp))*100; %relative error in %
-            end
-        end
-    end
-    
-    tmp=squeeze(max(abs(meanErrFilt),[],1));
-    bsm1prcLP=nan(nfeatures,1);
-    for ft=1:1:nfeatures
-        if ~isempty(find(tmp(ft,:)<=5,1,'first'))
-            bsm1prcLP(ft,1)=find(tmp(ft,:)<=5,1,'first');
-        end
-    end
-    bsm1prcLP(17,1)=1;
-    coffFreqLP=combinationsFg(idxLP(bsm1prcLP),1);
-    
-    
-    % get the highest highpass frequency without disturbing the features
-    idxHP=find(combinationsFg(:,1)==max(combinationsFg(:,1)));
-    meanErrFilt=nan(size(featureMatrix_noise,3),nfeatures,length(idxHP));
-    for ld=1:1:nleads % leads
-        for lp=1:1:length(idxHP)
-            for feat=1:1:18 % features
-                meanErrFilt(ld,feat,lp)=nanmean(relErr_cleanFilt{ld,1}(feat:nfeatures:end,lp))*100; %relative error in %
-            end
-        end
-    end
-    tmp=squeeze(max(abs(meanErrFilt),[],1));
-    bsm1prc=nan(nfeatures,1);
-    bsm1prcValHP=nan(nfeatures,1);
-    for ft=1:1:nfeatures
-        if ~isempty(find(tmp(ft,:)<=5,1,'first'))
-            bsm1prc(ft,1)=find(tmp(ft,:)<=5,1,'first');
-            bsm1prcValHP(ft,1)=tmp(ft,bsm1prc(ft,1));
-        end
-    end
-    bsm1prc(17,1)=1;
-    coffFreqHP=combinationsFg(idxHP(bsm1prc),2);
-    
-    meanErrNoise=nan(18,1);
-    stdErrNoise=nan(18,1);
+    medErrNoise=nan(18,1);
+    iqrErrNoise=nan(18,1);
     for feat=1:1:nfeatures
         lphp=find(combinationsFg(:,1)==coffFreqLP(feat,1)&combinationsFg(:,2)==coffFreqHP(feat,1));
-        relErr_noise2=cell2mat(cellfun(@(x) x(feat:nfeatures:end,lphp),relErr_noise_mean,'UniformOutput',0));
-        meanErrNoise(feat,1)=nanmean(abs(relErr_noise2))*100; %relative error in %
-        stdErrNoise(feat,1)=nanstd(abs(relErr_noise2))*100; %relative error in %
+        if feat==17
+            relErr_noise2=cell2mat(cellfun(@(x) x(feat:nfeatures:end,hplptmp),err_noise_mean,'UniformOutput',0));
+            acc=sum(abs(sign(relErr_noise2-1)))/sum(~isnan(relErr_noise2));
+            medErrNoise(feat,1)=acc;
+            iqrErrNoise(feat,1)=0;
+        else
+            relErr_noise2=cell2mat(cellfun(@(x) x(feat:nfeatures:end,lphp),relErr_noise_mean,'UniformOutput',0));
+            medErrNoise(feat,1)=nanmean(abs(relErr_noise2))*100; %relative error in %
+            iqrErrNoise(feat,1)=iqr(abs(relErr_noise2(~isnan(relErr_noise2))))*100; %relative error in %
+        end
     end
     
     table4=cell(2,1);
     for feat=1:1:nfeatures
         table4{1,1}=[table4{1,1},'Feat',num2str(feat,'%02i'),char(9)];
-        table4{2,1}=[table4{2,1},num2str(meanErrNoise(feat,1),'%3.1f'), char(177),num2str(stdErrNoise(feat,1),'%02.1f') ,char(9)];
+        table4{2,1}=[table4{2,1},num2str(medErrNoise(feat,1),'%3.1f'), char(177),num2str(iqrErrNoise(feat,1),'%02.1f') ,char(9)];
     end
     disp(table4)
 end
