@@ -1,6 +1,43 @@
 # ECGfeed
 A collection of ECG feature extraction algorithms for MATLAB.
 
+## Features
+F1 first statistical moment of the T wave distribution 
+
+F2 second statistical moment of the T wave distribution 
+
+F3 third statistical moment of the T wave distribution 
+
+F4 fourth statistical moment of the T wave distribution 
+
+F5 RT distance (R peak to T peak)
+
+F6 RT mid distance - in the case of biphasic waves
+
+F7 peakedness of the T wave
+
+F8 T wave amplitude
+
+F9 slope of the ascending part of the T wave
+
+F10 slope of the descending part of the T wave
+
+F11 ratio of first half T wave energy and whole T wave energy 
+
+F12 ratio of second half T wave energy and whole T wave energy 
+
+F13 R peak amplitude
+
+F14 R peak energy
+
+F15 ratio R peak energy and R peak amplitude
+
+F16 ST segment change (elevation or depression)
+
+F17 flag for biphasic T waves (0: monophasic, 1: biphasic)
+
+F18 R peak area under curve
+
 ## Filtering recommendations
 Highpass and lowpass filtering influences the morphology of the ECG. This is why this influence was evaluated for the proposed features and recommendations are given to prevent a distortion by wrong filtering.
 
